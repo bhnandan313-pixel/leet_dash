@@ -80,7 +80,6 @@
   .chart-panel h2 { font-size: 16px; margin-bottom: 14px; }
   .empty, .error { color: var(--text-dim); font-size: 14px; padding: 40px 0; text-align: center; }
   .error { color: var(--hard); }
-  .chart-unavailable { color: var(--text-dim); font-size: 13px; padding: 20px 0 4px; }
   footer { text-align: center; color: var(--text-dim); font-size: 12px; margin-top: 28px; }
 </style>
 </head>
@@ -167,11 +166,7 @@ function renderRankList(container, users) {
 
 function renderTrendChart(users) {
   if (typeof Chart === 'undefined') {
-    const canvas = document.getElementById('trend-chart');
-    const fallback = document.createElement('p');
-    fallback.className = 'chart-unavailable';
-    fallback.textContent = 'Trend chart unavailable while Chart.js is offline.';
-    canvas.replaceWith(fallback);
+    renderNativeTrendChart(users);
     return;
   }
 
@@ -204,6 +199,50 @@ function renderTrendChart(users) {
         y: { ticks: { color: '#8992a8' }, grid: { color: '#262d3d' }, beginAtZero: true },
       },
     },
+  });
+}
+
+function renderNativeTrendChart(users) {
+  const canvas = document.getElementById('trend-chart');
+  const context = canvas.getContext('2d');
+  const dates = Array.from(new Set(users.flatMap(u => Object.keys(u.history || {})))).sort();
+  const palette = ['#7fc45c', '#e8a33d', '#e05d5d', '#6ea8e0', '#d8b45c', '#c07fe0', '#5cd6c0', '#e07fb0'];
+  const width = canvas.clientWidth || 600;
+  const height = 220;
+  const padding = { top: 18, right: 18, bottom: 34, left: 42 };
+  const maxValue = Math.max(1, ...users.flatMap(u => Object.values(u.history || {})));
+  const x = index => padding.left + (dates.length < 2 ? 0 : index * (width - padding.left - padding.right) / (dates.length - 1));
+  const y = value => height - padding.bottom - value * (height - padding.top - padding.bottom) / maxValue;
+
+  canvas.width = width * devicePixelRatio;
+  canvas.height = height * devicePixelRatio;
+  canvas.style.height = `${height}px`;
+  context.scale(devicePixelRatio, devicePixelRatio);
+  context.clearRect(0, 0, width, height);
+  context.font = '11px IBM Plex Mono';
+  context.strokeStyle = '#262d3d';
+  context.fillStyle = '#8992a8';
+  context.lineWidth = 1;
+  context.beginPath();
+  context.moveTo(padding.left, padding.top);
+  context.lineTo(padding.left, height - padding.bottom);
+  context.lineTo(width - padding.right, height - padding.bottom);
+  context.stroke();
+  context.fillText(String(maxValue), 8, padding.top + 4);
+  context.fillText('0', 28, height - padding.bottom + 4);
+  if (dates.length) {
+    context.fillText(dates[0], padding.left, height - 10);
+    context.fillText(dates[dates.length - 1], Math.max(padding.left, width - padding.right - 72), height - 10);
+  }
+
+  users.forEach((user, userIndex) => {
+    const points = dates.map((date, index) => [x(index), y(user.history?.[date] ?? 0)]);
+    context.strokeStyle = palette[userIndex % palette.length];
+    context.fillStyle = palette[userIndex % palette.length];
+    context.beginPath();
+    points.forEach(([pointX, pointY], index) => index ? context.lineTo(pointX, pointY) : context.moveTo(pointX, pointY));
+    context.stroke();
+    points.forEach(([pointX, pointY]) => { context.beginPath(); context.arc(pointX, pointY, 3, 0, Math.PI * 2); context.fill(); });
   });
 }
 
