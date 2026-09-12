@@ -6,6 +6,7 @@ no backend server — just LeetCode's own public data, a daily cron job, and
 a static page.
 
 ## How it works
+
 1. `data/usernames.json` lists who to track.
 2. `fetch_leetcode.py` queries LeetCode's GraphQL endpoint for each username
    and writes the result into `data/leaderboard.json`, appending one
@@ -16,6 +17,7 @@ a static page.
    Click a row to expand top topics for that person.
 
 ## Setup
+
 1. Push this repo to GitHub.
 2. Edit `data/usernames.json` with real LeetCode usernames + display names.
 3. Enable GitHub Pages (Settings → Pages → deploy from `main` / root).
@@ -25,6 +27,7 @@ a static page.
 5. Visit your Pages URL. Share that link with friends — no login needed to view.
 
 ## Known fragility (read before you're surprised by it)
+
 - LeetCode's GraphQL endpoint is **unofficial and undocumented**. It can
   change shape or start rate-limiting/blocking scripted requests at any
   time. If the Action starts failing, check the workflow run logs first —

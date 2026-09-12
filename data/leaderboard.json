@@ -1,0 +1,28 @@
+{
+  "users": {
+    "Nandanbh_07": {
+      "display_name": "Vikram",
+      "history": {
+        "2026-09-12": 1
+      },
+      "current": {
+        "total_solved": 1,
+        "easy": 1,
+        "medium": 0,
+        "hard": 0,
+        "streak": 0,
+        "top_tags": [
+          {
+            "tag": "Array",
+            "solved": 1
+          },
+          {
+            "tag": "Hash Table",
+            "solved": 1
+          }
+        ]
+      }
+    }
+  },
+  "last_updated": "2026-09-12T15:23:39.162495+00:00"
+}
